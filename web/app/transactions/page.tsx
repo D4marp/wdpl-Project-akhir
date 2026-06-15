@@ -27,17 +27,18 @@ import {
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { api, type Transaction } from "@/lib/api";
 import { formatCurrency, formatShortDateTime } from "@/lib/format";
+import {
+  getTransactionPresentation,
+  transactionFactory,
+  type TransactionFormInput,
+} from "@/lib/transaction-factory";
+import {
+  TransactionSubject,
+} from "@/lib/transaction-observer";
 
 const LIMIT = 15;
 
-type FormState = {
-  type: "income" | "expense";
-  category: string;
-  description: string;
-  amount: string;
-};
-
-const defaultForm: FormState = {
+const defaultForm: TransactionFormInput = {
   type: "income",
   category: "",
   description: "",
@@ -51,7 +52,7 @@ export default function TransactionsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [form, setForm] = useState<FormState>(defaultForm);
+  const [form, setForm] = useState<TransactionFormInput>(defaultForm);
 
   const loadTransactions = (targetPage: number) => {
     setLoading(true);
@@ -79,17 +80,41 @@ export default function TransactionsPage() {
     setSaving(true);
 
     try {
-      await api.createTransaction({
-        type: form.type,
-        category: form.category,
-        description: form.description,
-        amount: Number(form.amount),
-      } as Omit<Transaction, "id" | "created_at">);
+      const product = transactionFactory.create(form);
+      product.validate();
+      const payload = product.getPayload();
+      const response = await api.createTransaction(payload);
+      const subject = new TransactionSubject();
 
-      toast.success("Transaksi berhasil disimpan");
-      setForm(defaultForm);
-      setPage(1);
-      loadTransactions(1);
+      subject.subscribe({
+        name: "history-observer",
+        onTransactionCreated: () => {
+          setPage(1);
+          loadTransactions(1);
+        },
+      });
+      subject.subscribe({
+        name: "notification-observer",
+        onTransactionCreated: async () => {
+          await api.getNotifications();
+        },
+      });
+      subject.subscribe({
+        name: "form-observer",
+        onTransactionCreated: () => setForm(defaultForm),
+      });
+      subject.subscribe({
+        name: "toast-observer",
+        onTransactionCreated: () => {
+          toast.success("Transaksi berhasil disimpan");
+        },
+      });
+
+      await subject.notifyTransactionCreated({
+        transaction: response.data,
+        payload,
+        occurredAt: new Date(),
+      });
     } catch (requestError) {
       const message = requestError instanceof Error ? requestError.message : "Gagal menyimpan transaksi";
       toast.error(message);
@@ -120,7 +145,7 @@ export default function TransactionsPage() {
                 multiple={false}
                 value={[form.type]}
                 onValueChange={(value) => {
-                  const nextType = value[0] as FormState["type"] | undefined;
+                  const nextType = value[0] as TransactionFormInput["type"] | undefined;
                   if (nextType) {
                     setForm((current) => ({ ...current, type: nextType }));
                   }
@@ -233,8 +258,8 @@ export default function TransactionsPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant={transaction.type === "income" ? "secondary" : "outline"}>
-                          {transaction.type === "income" ? "Pemasukan" : "Pengeluaran"}
+                        <Badge variant={getTransactionPresentation(transaction.type as TransactionFormInput["type"]).badgeVariant}>
+                          {getTransactionPresentation(transaction.type as TransactionFormInput["type"]).label}
                         </Badge>
                       </TableCell>
                       <TableCell>{formatShortDateTime(transaction.created_at)}</TableCell>
