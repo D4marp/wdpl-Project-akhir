@@ -10,7 +10,7 @@ type Tenant struct {
 
 type Transaction struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement"         json:"id"`
-	TenantID    string    `gorm:"index:idx_tenant_date"            json:"tenant_id"`
+	TenantID    string    `gorm:"type:varchar(191);index:idx_tenant_date" json:"tenant_id"`
 	Type        string    `json:"type"`
 	Category    string    `json:"category"`
 	Description string    `json:"description"`
@@ -20,8 +20,8 @@ type Transaction struct {
 
 type Budget struct {
 	ID          uint      `gorm:"primaryKey;autoIncrement"             json:"id"`
-	TenantID    string    `gorm:"uniqueIndex:uq_tenant_cat"            json:"tenant_id"`
-	Category    string    `gorm:"uniqueIndex:uq_tenant_cat"            json:"category"`
+	TenantID    string    `gorm:"type:varchar(191);uniqueIndex:uq_tenant_cat" json:"tenant_id"`
+	Category    string    `gorm:"type:varchar(191);uniqueIndex:uq_tenant_cat" json:"category"`
 	LimitAmount float64   `json:"limit_amount"`
 	SpentAmount float64   `json:"spent_amount"`
 	CreatedAt   time.Time `json:"created_at"`
@@ -29,7 +29,7 @@ type Budget struct {
 
 type Notification struct {
 	ID        uint      `gorm:"primaryKey;autoIncrement" json:"id"`
-	TenantID  string    `gorm:"index"                    json:"tenant_id"`
+	TenantID  string    `gorm:"type:varchar(191);index"  json:"tenant_id"`
 	Title     string    `json:"title"`
 	Message   string    `json:"message"`
 	Type      string    `json:"type"` // info | warning
