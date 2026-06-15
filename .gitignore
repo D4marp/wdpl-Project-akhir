@@ -1,0 +1,67 @@
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Logs and local runtime files
+*.log
+*.pid
+*.seed
+*.local
+
+# OS and editor files
+.DS_Store
+Thumbs.db
+Desktop.ini
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Node / Next.js web app
+node_modules/
+.next/
+out/
+dist/
+coverage/
+.vercel/
+.turbo/
+web/node_modules/
+web/.next/
+web/out/
+web/dist/
+web/coverage/
+web/.vercel/
+
+# Go backend local caches
+backend/.gocache/
+backend/.gomodcache/
+backend/.gotmp/
+backend/tmp/
+backend/bin/
+*.test
+*.prof
+
+# Flutter / Dart mobile app
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+mobile/.dart_tool/
+mobile/build/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+
+# Android / Gradle generated files
+.gradle/
+local.properties
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/app/build/
+
+# Temporary artifacts
+tmp/
+temp/
+*.tmp
+*.bak
