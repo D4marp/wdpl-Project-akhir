@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
-import { ArrowLeftIcon, ArrowRightIcon, CircleDollarSignIcon, ReceiptTextIcon } from "lucide-react";
+import { ArrowLeftIcon, ArrowRightIcon, CircleDollarSignIcon, ReceiptTextIcon, SparklesIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -124,19 +124,25 @@ export default function TransactionsPage() {
   };
 
   return (
-    <div className="grid gap-6 xl:grid-cols-[380px_1fr]">
-      <Card>
-        <CardHeader>
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <ReceiptTextIcon className="size-4" />
-            <span className="text-sm font-medium">Input transaksi</span>
+    <div className="grid gap-6 xl:grid-cols-[420px_1fr]">
+      <Card className="relative overflow-hidden border-0 bg-white shadow-[0_28px_80px_-48px_hsl(226_83%_57%/0.75)] ring-1 ring-white/80">
+        <div className="relative overflow-hidden bg-gradient-to-br from-blue-600 via-indigo-500 to-sky-400 p-6 text-primary-foreground">
+          <div className="absolute -right-14 -top-14 size-40 rounded-full bg-white/20" />
+          <div className="absolute -bottom-20 left-10 size-44 rounded-full bg-cyan-300/20" />
+          <div className="relative flex items-center gap-3">
+            <div className="flex size-12 items-center justify-center rounded-2xl bg-white/20 text-primary-foreground shadow-inner">
+              <ReceiptTextIcon className="size-5" />
+            </div>
+            <div>
+              <span className="text-xs font-semibold uppercase tracking-normal text-white/75">Input transaksi</span>
+              <CardTitle className="mt-1 text-xl text-primary-foreground">Catat transaksi baru</CardTitle>
+            </div>
           </div>
-          <CardTitle>Catat pemasukan & pengeluaran</CardTitle>
-          <CardDescription>
-            Toast Sonner hanya muncul pada hasil submit transaksi, sesuai permintaan.
+          <CardDescription className="relative mt-4 max-w-sm text-primary-foreground/80">
+            Tambahkan transaksi harian dengan form yang ringkas dan mudah dipindai.
           </CardDescription>
-        </CardHeader>
-        <CardContent>
+        </div>
+        <CardContent className="pt-6">
           <form onSubmit={submit} className="flex flex-col gap-5">
             <div className="flex flex-col gap-2">
               <Label htmlFor="transaction-type">Jenis transaksi</Label>
@@ -150,10 +156,10 @@ export default function TransactionsPage() {
                     setForm((current) => ({ ...current, type: nextType }));
                   }
                 }}
-                className="grid w-full grid-cols-2"
+                className="grid w-full grid-cols-2 rounded-2xl border border-blue-100 bg-blue-50/70 p-1.5 shadow-inner"
               >
-                <ToggleGroupItem value="income">Pemasukan</ToggleGroupItem>
-                <ToggleGroupItem value="expense">Pengeluaran</ToggleGroupItem>
+                <ToggleGroupItem value="income" className="w-full">Pemasukan</ToggleGroupItem>
+                <ToggleGroupItem value="expense" className="w-full">Pengeluaran</ToggleGroupItem>
               </ToggleGroup>
             </div>
 
@@ -198,7 +204,12 @@ export default function TransactionsPage() {
               />
             </div>
 
-            <Button type="submit" size="lg" disabled={saving}>
+            <Button
+              type="submit"
+              size="lg"
+              disabled={saving}
+              className="h-12 bg-gradient-to-r from-blue-600 via-indigo-500 to-sky-500 shadow-[0_18px_34px_-20px_hsl(226_83%_57%/0.95)] hover:brightness-105"
+            >
               <CircleDollarSignIcon data-icon="inline-start" />
               {saving ? "Menyimpan..." : "Simpan Transaksi"}
             </Button>
@@ -206,12 +217,17 @@ export default function TransactionsPage() {
         </CardContent>
       </Card>
 
-      <Card>
-        <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-          <div className="space-y-1">
+      <Card className="relative overflow-hidden border-0 bg-white shadow-[0_28px_80px_-52px_hsl(224_70%_45%/0.55)] ring-1 ring-white/80">
+        <div className="absolute inset-x-0 top-0 h-1.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-cyan-400" />
+        <CardHeader className="flex flex-col gap-3 border-b border-border/70 bg-gradient-to-r from-white to-blue-50/60 pb-5 md:flex-row md:items-center md:justify-between">
+          <div className="space-y-1.5">
+            <div className="flex items-center gap-2">
+              <SparklesIcon className="size-4 text-primary" />
+              <span className="aesthetic-kicker">Riwayat</span>
+            </div>
             <CardTitle>Riwayat transaksi</CardTitle>
             <CardDescription>
-              Data ini tetap berasal dari endpoint backend `GET /api/transactions`.
+              Semua catatan terbaru tersusun rapi berdasarkan waktu input.
             </CardDescription>
           </div>
           <Badge variant="secondary">{total} transaksi</Badge>
@@ -223,7 +239,7 @@ export default function TransactionsPage() {
             </div>
           ) : null}
 
-          <div className="overflow-hidden rounded-lg border">
+          <div className="overflow-hidden rounded-2xl border border-border/70 bg-white shadow-inner">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -252,9 +268,16 @@ export default function TransactionsPage() {
                   transactions.map((transaction) => (
                     <TableRow key={transaction.id}>
                       <TableCell>
-                        <div className="font-medium">{transaction.category}</div>
-                        <div className="text-xs text-muted-foreground">
-                          {transaction.description || "Tanpa keterangan"}
+                        <div className="flex items-center gap-3">
+                          <div className={transaction.type === "income" ? "flex size-10 items-center justify-center rounded-2xl bg-blue-50 text-blue-600" : "flex size-10 items-center justify-center rounded-2xl bg-slate-100 text-slate-600"}>
+                            <CircleDollarSignIcon className="size-4" />
+                          </div>
+                          <div>
+                            <div className="font-semibold text-slate-900">{transaction.category}</div>
+                            <div className="text-xs text-muted-foreground">
+                              {transaction.description || "Tanpa keterangan"}
+                            </div>
+                          </div>
                         </div>
                       </TableCell>
                       <TableCell>

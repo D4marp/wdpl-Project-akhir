@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../config.dart';
+import '../patterns/transaction_factory.dart';
 
 class ApiException implements Exception {
   final String message;
@@ -53,18 +54,10 @@ class ApiService {
     return _get('/api/transactions?page=$page&limit=$limit');
   }
 
-  static Future<Map<String, dynamic>> createTransaction({
-    required String type,
-    required String category,
-    required String description,
-    required double amount,
-  }) async {
-    return _post('/api/transactions', {
-      'type': type,
-      'category': category,
-      'description': description,
-      'amount': amount,
-    });
+  static Future<Map<String, dynamic>> createTransaction(
+    CreateTransactionPayload payload,
+  ) async {
+    return _post('/api/transactions', payload.toJson());
   }
 
   static Future<Map<String, dynamic>?> getReport(String period) async {

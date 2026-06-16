@@ -10,7 +10,6 @@ import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -125,39 +124,66 @@ export default function DashboardPage() {
                 <CardHeader className="gap-3">
                   <Skeleton className="h-4 w-28" />
                   <Skeleton className="h-9 w-40" />
-                </CardHeader>
-                <CardFooter>
                   <Skeleton className="h-4 w-full" />
-                </CardFooter>
+                </CardHeader>
               </Card>
             ))
-          : cards.map((card) => (
-              <Card key={card.title} className="overflow-hidden border-border/70">
-                <CardHeader className="gap-3">
+          : cards.map((card, index) => (
+              <Card
+                key={card.title}
+                className={
+                  index === 0
+                    ? "relative overflow-hidden border-blue-500 bg-gradient-to-br from-blue-600 via-blue-500 to-indigo-500 text-primary-foreground shadow-[0_28px_50px_-22px_hsl(226_83%_57%/0.95)] before:absolute before:-right-12 before:-top-12 before:size-36 before:rounded-full before:bg-white/15 after:absolute after:-bottom-16 after:left-12 after:size-40 after:rounded-full after:bg-sky-300/20"
+                    : "overflow-hidden transition-transform duration-200 hover:-translate-y-0.5 hover:shadow-[0_26px_55px_-36px_hsl(224_70%_45%/0.6)]"
+                }
+              >
+                <CardHeader className="relative h-full gap-4 py-6">
                   <div className="flex items-center justify-between gap-3">
-                    <CardDescription>{card.title}</CardDescription>
-                    <div className="rounded-full border border-border/70 bg-muted p-2 text-muted-foreground">
+                    <CardDescription
+                      className={index === 0 ? "text-primary-foreground/80" : "text-muted-foreground"}
+                    >
+                      {card.title}
+                    </CardDescription>
+                    <div
+                      className={
+                        index === 0
+                          ? "rounded-2xl bg-white/20 p-2.5 text-primary-foreground shadow-inner"
+                          : "rounded-2xl bg-blue-50 p-2.5 text-primary"
+                      }
+                    >
                       <card.icon className="size-4" />
                     </div>
                   </div>
-                  <CardTitle className="text-3xl font-semibold tracking-tight">
+                  <CardTitle
+                    className={
+                      index === 0
+                        ? "text-3xl font-semibold tracking-normal text-primary-foreground"
+                        : "text-3xl font-semibold tracking-normal text-slate-950"
+                    }
+                  >
                     {formatCurrency(card.value)}
                   </CardTitle>
+                  <div
+                    className={
+                      index === 0
+                        ? "mt-auto rounded-2xl bg-white/15 px-3 py-2 text-sm text-primary-foreground/90"
+                        : "mt-auto rounded-2xl bg-blue-50 px-3 py-2 text-sm text-muted-foreground"
+                    }
+                  >
+                    {card.hint}
+                  </div>
                 </CardHeader>
-                <CardFooter className="border-t bg-muted/30 py-3 text-sm text-muted-foreground">
-                  {card.hint}
-                </CardFooter>
               </Card>
             ))}
       </section>
 
       <section className="grid gap-6 xl:grid-cols-[1.5fr_1fr]">
-        <Card>
+        <Card className="bg-gradient-to-br from-white to-blue-50/35">
           <CardHeader className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
             <div className="space-y-1">
               <CardTitle>Arus kas terbaru</CardTitle>
               <CardDescription>
-                Dibangun dari transaksi terbaru yang diambil dari endpoint backend.
+                Ringkasan pergerakan pemasukan dan pengeluaran terbaru.
               </CardDescription>
             </div>
             <Button variant="outline" size="sm" render={<Link href="/reports" />}>
@@ -216,11 +242,11 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader className="flex flex-row items-center justify-between gap-3">
+        <Card className="bg-gradient-to-br from-white to-slate-50">
+          <CardHeader className="flex flex-row items-center justify-between gap-3 border-b border-border/70 pb-4">
             <div className="space-y-1">
               <CardTitle>Transaksi terbaru</CardTitle>
-              <CardDescription>Snapshot cepat dari mutasi kas terakhir.</CardDescription>
+              <CardDescription>Mutasi terakhir yang perlu cepat dipantau.</CardDescription>
             </div>
             <Button variant="ghost" size="sm" render={<Link href="/transactions" />}>
               Semua
@@ -239,7 +265,7 @@ export default function DashboardPage() {
                 Belum ada transaksi tercatat.
               </div>
             ) : (
-              <div className="overflow-hidden rounded-lg border">
+              <div className="overflow-hidden rounded-2xl border border-border/70 bg-white shadow-inner">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -253,12 +279,16 @@ export default function DashboardPage() {
                     {transactions.slice(0, 6).map((transaction) => (
                       <TableRow key={transaction.id}>
                         <TableCell>
-                          <div className="font-medium">{transaction.category}</div>
+                          <div className="font-semibold text-slate-900">{transaction.category}</div>
                           <div className="text-xs text-muted-foreground">
                             {transaction.description || "Tanpa keterangan"}
                           </div>
                         </TableCell>
-                        <TableCell>{transaction.type === "income" ? "Pemasukan" : "Pengeluaran"}</TableCell>
+                        <TableCell>
+                          <span className={transaction.type === "income" ? "rounded-full bg-blue-50 px-2.5 py-1 text-xs font-medium text-blue-700" : "rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-700"}>
+                            {transaction.type === "income" ? "Pemasukan" : "Pengeluaran"}
+                          </span>
+                        </TableCell>
                         <TableCell>{formatShortDateTime(transaction.created_at)}</TableCell>
                         <TableCell className="text-right font-medium">
                           {formatCurrency(transaction.amount)}

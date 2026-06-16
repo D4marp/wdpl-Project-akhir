@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Bar, BarChart, CartesianGrid, Line, LineChart, XAxis, YAxis } from "recharts";
+import { CircleDollarSignIcon, TrendingDownIcon, TrendingUpIcon } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import {
@@ -120,16 +121,18 @@ export default function ReportsPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <Card>
+      <Card className="relative overflow-hidden border-blue-500 bg-gradient-to-br from-blue-600 via-blue-500 to-sky-500 text-primary-foreground shadow-[0_28px_55px_-28px_hsl(226_83%_57%/0.95)]">
+        <div className="absolute -right-20 -top-20 size-56 rounded-full bg-white/15" />
+        <div className="absolute -bottom-24 left-1/3 size-64 rounded-full bg-cyan-300/20" />
         <CardHeader className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
           <div className="space-y-1">
-            <CardTitle>Laporan keuangan</CardTitle>
-            <CardDescription>
-              Semua visual ini tetap memakai endpoint backend `GET /api/reports`.
+            <CardTitle className="relative text-primary-foreground">Laporan keuangan</CardTitle>
+            <CardDescription className="relative text-primary-foreground/80">
+              Pilih periode dan lihat performa kas dalam visual yang lebih ringan.
             </CardDescription>
           </div>
           <Select value={period} onValueChange={(value) => value && setPeriod(value)}>
-            <SelectTrigger className="w-full md:w-44" aria-label="Pilih periode laporan">
+            <SelectTrigger className="relative w-full border-white/30 bg-white/95 text-foreground md:w-44" aria-label="Pilih periode laporan">
               <SelectValue placeholder="Pilih periode" />
             </SelectTrigger>
             <SelectContent>
@@ -163,14 +166,19 @@ export default function ReportsPage() {
               </Card>
             ))
           : report && [
-              { title: "Pemasukan", value: report.total_income },
-              { title: "Pengeluaran", value: report.total_expense },
-              { title: "Saldo", value: report.balance },
+              { title: "Pemasukan", value: report.total_income, icon: TrendingUpIcon, tone: "from-blue-50 to-white text-blue-700" },
+              { title: "Pengeluaran", value: report.total_expense, icon: TrendingDownIcon, tone: "from-slate-50 to-white text-slate-700" },
+              { title: "Saldo", value: report.balance, icon: CircleDollarSignIcon, tone: "from-sky-50 to-white text-sky-700" },
             ].map((item) => (
-              <Card key={item.title}>
-                <CardHeader className="gap-2">
-                  <CardDescription>{item.title}</CardDescription>
-                  <CardTitle className="text-3xl font-semibold tracking-tight">
+              <Card key={item.title} className={`bg-gradient-to-br ${item.tone}`}>
+                <CardHeader className="gap-3">
+                  <div className="flex items-center justify-between gap-3">
+                    <CardDescription className="text-current/70">{item.title}</CardDescription>
+                    <div className="rounded-2xl bg-white p-2.5 shadow-sm">
+                      <item.icon className="size-4" />
+                    </div>
+                  </div>
+                  <CardTitle className="text-3xl font-semibold tracking-normal text-slate-950">
                     {formatCurrency(item.value)}
                   </CardTitle>
                 </CardHeader>
@@ -179,7 +187,7 @@ export default function ReportsPage() {
       </section>
 
       <section className="grid gap-6 xl:grid-cols-2">
-        <Card>
+        <Card className="bg-gradient-to-br from-white to-blue-50/35">
           <CardHeader>
             <CardTitle>Komposisi per kategori</CardTitle>
             <CardDescription>Perbandingan pemasukan dan pengeluaran pada kategori aktif.</CardDescription>
@@ -218,7 +226,7 @@ export default function ReportsPage() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="bg-gradient-to-br from-white to-sky-50/35">
           <CardHeader>
             <CardTitle>Tren waktu</CardTitle>
             <CardDescription>Perubahan nilai transaksi berdasarkan tanggal pencatatan.</CardDescription>
@@ -265,16 +273,16 @@ export default function ReportsPage() {
         </Card>
       </section>
 
-      <Card>
-        <CardHeader className="flex flex-row items-center justify-between gap-3">
+      <Card className="bg-gradient-to-br from-white to-slate-50">
+        <CardHeader className="flex flex-row items-center justify-between gap-3 border-b border-border/70 pb-4">
           <div className="space-y-1">
             <CardTitle>Detail transaksi periode ini</CardTitle>
-            <CardDescription>Daftar raw transaction yang dikembalikan oleh backend.</CardDescription>
+            <CardDescription>Daftar transaksi yang membentuk laporan periode ini.</CardDescription>
           </div>
           <Badge variant="secondary">{report?.transactions.length ?? 0} item</Badge>
         </CardHeader>
         <CardContent>
-          <div className="overflow-hidden rounded-lg border">
+          <div className="overflow-hidden rounded-2xl border border-border/70 bg-white shadow-inner">
             <Table>
               <TableHeader>
                 <TableRow>

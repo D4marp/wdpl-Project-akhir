@@ -35,3 +35,13 @@ flutter build apk --release \
 - **Provider**: global state di `providers/finance_provider.dart`
 - **ApiService**: semua HTTP call terpusat di `services/api_service.dart`
 - **Screen** berkomunikasi via Provider, bukan langsung ke ApiService
+- **Factory Pattern**: `patterns/transaction_factory.dart` membuat product transaksi income/expense, memvalidasi input, dan menghasilkan payload API.
+- **Observer Pattern**: `patterns/transaction_observer.dart` mempublish event setelah transaksi berhasil dibuat, lalu observer menjalankan efek lanjutan seperti refresh summary dan riwayat transaksi.
+
+## Alur Tambah Transaksi
+1. Screen mengirim input transaksi ke `FinanceProvider.addTransaction`.
+2. `TransactionFactory` membuat `IncomeTransactionProduct` atau `ExpenseTransactionProduct`.
+3. Product menjalankan validasi dan menghasilkan `CreateTransactionPayload`.
+4. `ApiService` mengirim payload ke backend.
+5. Jika backend berhasil membuat transaksi, `TransactionSubject` mempublish `TransactionCreatedEvent`.
+6. `RefreshFinanceObserver` menerima event dan menjalankan refresh data mobile.

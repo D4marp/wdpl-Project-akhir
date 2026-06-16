@@ -1,7 +1,12 @@
 import 'package:flutter/foundation.dart';
+import '../patterns/transaction_factory.dart';
+import '../patterns/transaction_observer.dart';
 import '../services/api_service.dart';
 
 class FinanceProvider with ChangeNotifier {
+  final TransactionFactory _transactionFactory = TransactionFactory();
+  late final TransactionSubject _transactionSubject;
+
   double income = 0;
   double expense = 0;
   double balance = 0;
@@ -11,6 +16,11 @@ class FinanceProvider with ChangeNotifier {
   bool isLoadingSummary = false;
   bool isLoadingTransactions = false;
   String error = '';
+
+  FinanceProvider() {
+    _transactionSubject = TransactionSubject()
+      ..subscribe(RefreshFinanceObserver(refresh));
+  }
 
   Future<void> loadSummary() async {
     isLoadingSummary = true;
@@ -55,13 +65,27 @@ class FinanceProvider with ChangeNotifier {
     required double amount,
   }) async {
     try {
-      await ApiService.createTransaction(
-        type: type,
-        category: category,
-        description: description,
-        amount: amount,
+      final product = _transactionFactory.create(
+        TransactionFormInput(
+          type: type,
+          category: category,
+          description: description,
+          amount: amount,
+        ),
       );
-      await refresh();
+      product.validate();
+
+      final payload = product.getPayload();
+      final response = await ApiService.createTransaction(payload);
+
+      await _transactionSubject.notifyTransactionCreated(
+        TransactionCreatedEvent(
+          transaction: response['data'] as Map<String, dynamic>? ?? response,
+          payload: payload,
+          occurredAt: DateTime.now(),
+        ),
+      );
+
       return null;
     } catch (e) {
       return e.toString();
